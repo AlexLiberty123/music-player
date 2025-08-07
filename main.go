@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -21,7 +23,15 @@ func main() {
 	var time_button_x int = 8
 
 	var music_count int = 0
-	var musics [3]string = [3]string{"Music\\Chopin Torrent.mp3", "Music\\Rondo Alla Turca.mp3", "Music\\Hungarian Rhapsody 2.mp3"}
+	var musics []string
+
+	var help_path string = "Music\\"
+
+	files, _ := ioutil.ReadDir("./Music")
+
+	for _, file := range files {
+		musics = append(musics, file.Name())
+	}
 
 	var run_button_x int = 8
 	var volume float32 = 0
@@ -31,7 +41,8 @@ func main() {
 	var top_border_run_button int = 745
 	var top_border_music_button int = 790
 
-	music_path := musics[music_count]
+	music_path := help_path + musics[music_count]
+	fmt.Println(music_path)
 	music := rl.LoadMusicStream(music_path)
 	music_name := strings.ReplaceAll(filepath.Base(music_path), ".mp3", "")
 	music_length := rl.GetMusicTimeLength(music)
@@ -80,7 +91,7 @@ func main() {
 
 		music_time_played := rl.GetMusicTimePlayed(music)
 
-		//Кнопка выхода
+		//Exit button
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), exit_button) {
 			if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 				rl.StopMusicStream(music)
@@ -90,7 +101,7 @@ func main() {
 			}
 		}
 
-		//Остановка музыки
+		//Stop music
 		if time_button_x >= 743 {
 			rl.StopMusicStream(music)
 			time_button_x = 8
@@ -98,7 +109,7 @@ func main() {
 			rl.UpdateMusicStream(music)
 		}
 
-		//Включение следующей музыки
+		//Turn on the next music
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), next_music_button) {
 			if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 				rl.StopMusicStream(music)
@@ -109,7 +120,7 @@ func main() {
 					music_count = music_count + 1
 				}
 
-				music_path = musics[music_count]
+				music_path = help_path + musics[music_count]
 				music_name = strings.ReplaceAll(filepath.Base(music_path), ".mp3", "")
 				music = rl.LoadMusicStream(music_path)
 				music_length = rl.GetMusicTimeLength(music)
@@ -117,7 +128,7 @@ func main() {
 			}
 		}
 
-		//Включение предыдущей музыки
+		//Turn on previous music
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), back_music_button) {
 			if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 				rl.StopMusicStream(music)
@@ -128,7 +139,7 @@ func main() {
 					music_count = music_count - 1
 				}
 
-				music_path = musics[music_count]
+				music_path = help_path + musics[music_count]
 				music_name = strings.ReplaceAll(filepath.Base(music_path), ".mp3", "")
 				music = rl.LoadMusicStream(music_path)
 				music_length = rl.GetMusicTimeLength(music)
@@ -136,12 +147,12 @@ func main() {
 			}
 		}
 
-		//Изменение координат ползунка времени
+		//Changing the coordinates of the time slider
 		if rl.IsMusicStreamPlaying(music) {
 			time_button_x = int(735*music_time_played)/int(music_length) + 8
 		}
 
-		//Изменение координат полузунка времени один нажатием
+		//Change the coordinates of the time slider with one click
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), line_for_music_button) {
 			if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 				if rl.GetMousePosition().X > float32(low_border_music_button) && rl.GetMousePosition().X < float32(top_border_music_button) {
@@ -151,7 +162,7 @@ func main() {
 			}
 		}
 
-		//Изменение координат ползунка громкости
+		//Changing the coordinates of the volume slider
 		if run_button_x > low_border_run_button && run_button_x < top_border_run_button {
 			if rl.IsKeyDown(rl.KeyRight) {
 				run_button_x = run_button_x + 2
@@ -170,7 +181,7 @@ func main() {
 			}
 		}
 
-		//Перемещение ползунка громкости одним кликом
+		//Move the volume slider with one click
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), line_for_run_button) {
 			if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 				if rl.GetMousePosition().X > float32(low_border_run_button) && rl.GetMousePosition().X < float32(top_border_run_button) {
@@ -179,7 +190,7 @@ func main() {
 			}
 		}
 
-		//Включение музыки
+		//Turn on the music
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), music_button) {
 			if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 				if !rl.IsMusicStreamPlaying(music) {
@@ -188,7 +199,7 @@ func main() {
 			}
 		}
 
-		//Постановка музыки на паузу
+		//Pause music
 		if rl.CheckCollisionPointRec(rl.GetMousePosition(), pause_button) {
 			if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 				if !rl.IsMusicStreamPlaying(music) {
@@ -199,7 +210,7 @@ func main() {
 			}
 		}
 
-		//Махинации со звуком
+		//Sound manipulation
 		volume = float32(run_button_x) / 740
 
 		if run_button_x == low_border_run_button+1 {
